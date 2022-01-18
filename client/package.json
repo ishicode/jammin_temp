@@ -6,6 +6,9 @@
   "repository": "https://github.com/weblab-class/yohandev-realnav1234-ishicode.git",
   "author": "ishicode, realnav1234, yohandev",
   "license": "MIT",
+  "engines": {
+    "node": "17.x"
+  },
   "scripts": {
     "build": "node build.js build",
     "dev": "node build.js dev",
