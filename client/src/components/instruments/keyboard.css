@@ -1,0 +1,59 @@
+.kb-container {
+    width: 70vw;
+    height: 20vw;
+
+    justify-content: center;
+    align-content: center;
+
+    display: flex;
+    transform: translateX(17.5px); /* Undo octaves common border */
+    margin: auto;
+}
+
+.kb-octave {
+    float: left;
+    position: relative;
+    margin-left: -17.5px; /* Octaves share common border */
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+}
+
+.kb-key {
+    float: left;
+    position: relative;
+}
+/* White key alignment. */
+.kb-key-white {
+    height: 100%;
+    width: calc(100% / 7);
+
+    background-image: url('../../assets/kb-white.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+/* Black key alignment: 55% of white keys. */
+.kb-key-black {
+    height: 50%;
+    width: calc(100% / 7 * 0.55);
+
+    background-image: url('../../assets/kb-black.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+
+    z-index: 10;
+}
+/* Create black-white overlap. */
+.kb-key-black, .kb-key-A, .kb-key-B, .kb-key-D, .kb-key-E, .kb-key-G {
+    margin: 0 0 0 calc((100% / 7 * 0.55) / -2);
+}
+/* Share common border. */
+.kb-key-white {
+    margin-right: -2.5px;
+}
+/* Align black keys with white. */
+.kb-key-black {
+    transform: translateX(1.25px);
+}

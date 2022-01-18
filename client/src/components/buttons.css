@@ -1,0 +1,125 @@
+.btn-play, .btn-record {
+    width: 3.5vw;
+    height: 3.5vw;
+
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.btn-play {
+    background-image: url("../assets/btn-play.svg");
+}
+.btn-record {
+    background-image: url("../assets//btn-record.svg");
+}
+
+#loginbtn:hover {
+    cursor: pointer;
+  }
+  span.label {
+    font-family: serif;
+    font-weight: normal;
+  }
+  span.buttonText {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 40px;
+    font-weight: bold;
+  }
+.btn-sign-in {
+    display: inline-block;
+    background-color: #6518fe76;
+    color: rgb(49, 49, 49);
+    width:20%;
+    height: 4%;
+    border-radius: 5px;
+    padding:10px;
+    border: thin solid rgb(0, 0, 0);
+    box-shadow: 1px 1px 1px grey;
+    white-space: nowrap;
+    margin: 50px;
+    margin-top: 50px;
+    float: right;
+  }
+
+  .test {
+    animation: squiggly-anim 0.5s linear infinite;
+  }
+  .test {
+    display: inline-block;
+    vertical-align: middle;
+    width: 100%;
+    outline: none;
+    text-align: center;
+    line-height: 1;
+    justify-content: "center";
+    align-items: "center";
+  }
+  @-moz-keyframes squiggly-anim {
+    0% {
+      filter: url("#squiggly-0");
+    }
+    25% {
+      filter: url("#squiggly-1");
+    }
+    50% {
+      filter: url("#squiggly-2");
+    }
+    75% {
+      filter: url("#squiggly-3");
+    }
+    100% {
+      filter: url("#squiggly-4");
+    }
+  }
+  @-webkit-keyframes squiggly-anim {
+    0% {
+      filter: url("#squiggly-0");
+    }
+    25% {
+      filter: url("#squiggly-1");
+    }
+    50% {
+      filter: url("#squiggly-2");
+    }
+    75% {
+      filter: url("#squiggly-3");
+    }
+    100% {
+      filter: url("#squiggly-4");
+    }
+  }
+  @-o-keyframes squiggly-anim {
+    0% {
+      filter: url("#squiggly-0");
+    }
+    25% {
+      filter: url("#squiggly-1");
+    }
+    50% {
+      filter: url("#squiggly-2");
+    }
+    75% {
+      filter: url("#squiggly-3");
+    }
+    100% {
+      filter: url("#squiggly-4");
+    }
+  }
+  @keyframes squiggly-anim {
+    0% {
+      filter: url("#squiggly-0");
+    }
+    25% {
+      filter: url("#squiggly-1");
+    }
+    50% {
+      filter: url("#squiggly-2");
+    }
+    75% {
+      filter: url("#squiggly-3");
+    }
+    100% {
+      filter: url("#squiggly-4");
+    }
+  }

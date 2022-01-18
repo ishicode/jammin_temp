@@ -1,0 +1,27 @@
+.track-container {
+    position: relative;
+    
+    width: 100%;
+    height: 7.5vw;
+
+    border: calc(min(0.6vw, 0.6vh)) solid black;
+    border-radius: 2px;
+
+    margin-bottom: 0.5vw;
+}
+#track-0 {
+    background-color: #F099B5;
+}
+#track-1 {
+    background-color: #EB9786;
+}
+
+.track-note {
+    position: absolute;
+    background-color: black;
+
+    min-width: 0.4vw;
+    height: 0.4vw;
+
+    border-radius: 0.4vw;
+}

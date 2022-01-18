@@ -1,0 +1,31 @@
+/* @font-face{
+    font-family: PartyConfetti;
+    src: url('./assets/PartyConfetti.ttf');
+} */
+
+body {
+    margin: 0;
+    /* font-family: PartyConfetti; */
+}
+
+.squiggly {
+    filter: url("#squiggly");
+}
+
+#paper-overlay {
+    width: 100%;
+    height: 100%;
+}
+#paper-overlay:before {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  
+    content: '';
+  
+    background: url('./assets/paper.jpg');
+    mix-blend-mode: multiply;
+  
+    pointer-events: none;
+    z-index: 100;
+}
