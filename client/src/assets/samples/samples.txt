@@ -1,2 +1,0 @@
-Piano:
-https://github.com/sgossner/VCSL/tree/master/Chordophones/Zithers/Grand%20Piano%2C%20Steinway%20B

@@ -1,172 +1,128 @@
-const http = require('http');
+/* -----CONFIG----- */
+const PORT = 3000;
+const MAX_PLAYERS = 5;
+/* ---------------- */
 
-const websocketServer = require("websocket").server;
-//const httpServer = http.createServer(); 
-//httpServer.listen(7070, () => console.log("Open on 7070")); 
+/* ---GAME STATE--- */
+const uuid = require('uuid');
 
-//module.exports()
-/* const app = require('express')();
-app.get("/", (req, res)=> res.sendFile(__dirname + "/index.html")); 
-app.listen(9091, () => console.log('Listening on http port 9091'));
-//this will serve the HTML page */
+const games = {};
+const players = {};
+/* ---------------- */
 
-const wsServer = new websocketServer('ws://localhost:7070')  //This guy has become httpServer property
+/* -----SERVER----- */
+const { Server } = require('socket.io');
+const express = require('express');
+const path = require('path');
 
-clients = {}; //hashmap for clients
-games = {}; // hashmap for gameid
-maxPlayers = 5;
+const app = express();
+const server = require('http').createServer(app);
+const io = new Server(server);
+/* ---------------- */
 
+// Server all the files in `out/`
+app.use(express.static(path.resolve(__dirname, '../client/out')))
 
+// Listen for incoming socket connections
+io.on('connection', (socket) => {
+    console.log(`User#${socket.id} connected!`);
+    
+    // Subscribe to client's events
+    socket.on('disconnect', () => {
+        console.log(`User#${socket.id} disconnected.`);
+    });
+    socket.on('create-game', () => {
+        // Create game ID to send back to player
+        // Note: This takes the first segment of a UUID
+        const id = uuid.v4().split('-')[0];
 
-wsServer.on("request", request => {
-
-    const connection = request.accept(null, request.origin); //null means accept any. 
-    //This is the connection any client has to the server
-    connection.on("open", () => console.log("opened!"));
-    connection.on("closed", () => console.log("closed!"));
-    connection.on("message", () => message => {
-
-        const result = JSON.parse(message.utf8Data); //message received from client
-
-        if (result.method === "create") {
-            const clientId = result.clientId; // who are you
-            const gameId = guid();
-            games[gameId] = {
-                "id": gameId,
-                "track": [],
-                "clients": []
-
-            } //instance of game    
-
-
-
-        const payLoad = {
-            "method": "create",
-            "game" : games[gameId]
+        // Register game
+        games[id] = {
+            // Clients in game
+            clients: [socket],
+            // [Rounds] where Rounds: { (client.id): [track data] }
+            tracks: [],
+            // Length of tracks -1
+            round: -1,
         }
-        const con = clients[clientId].connection; // give the connection needed
-        con.send(JSON.stringify(payLoad)); //sent to server. new game created
-    }
+        // Register host
+        players[socket.id] = id;
 
-    if (result.method === "join") {
-
-        const clientId = result.clientId;
-        const gameId = result.gameId;
-        const game = games[gameId];
-
-        if (game.clients.length > maxPlayers) {
-            console.log("Sorry, maximum players reached!");
-            return;
+        // Send response back to client
+        socket.emit('create-game-res', id);
+    });
+    socket.on('join-game', (id) => {
+        if (!games[id]) {
+            return socket.emit('error', 'Game does not exist!');
         }
-
-        // avatar code
-
-        //if (game.clients.length === maxPlayers || result.method === "start") updateGameState();
-
-        const payLoad = {
-            "method": "join",
-            "game" : game 
+        if (games[id].clients.length > MAX_PLAYERS) {
+            return socket.emit('error', 'Max players reached!');
         }
-        
-        //Tells clients who has joined. Create new track 
-        game.clients.forEach(c => {
+        // Register client with game
+        games[id].clients.push(socket);
+        players[socket.id] = id;
 
-            clients[c.clientId].connection.send(JSON.stringify(payLoad));
+        // TODO: notify client
+    });
+    socket.on('start-game', () => {
+        let game = findGame(socket);
+        if (game) {
+            if (game.round >= 0) {
+                return socket.emit('error', "The game has already started!");
+            }
 
-
-        })
-
-    }
-
-        
-
-        if (result.method === 'start') {
-
-            const clientId = result.clientId;
-            const gameId = result.gameId;
-            const game = games[gameId];
-            let tracks = result.track;
-
-            game.clients.forEach(c => {
-                game.track.push(`Track${clientId}.mp3`);
+            // Create round
+            game.tracks.push({});
+            game.round = 0;
+            // Notify everyone
+            game.clients.forEach((c) => {
+                c.emit('start-round', [/* Other's track data, starts empty */])
             })
-
-            const payLoad = {
-                "method": "start",
-                "game" : game,
-                "tracks": game.track,
-                "clients": game.clients,
-                "round": 1,
-
-            }
-
-            con.send(JSON.stringify(payLoad));
-
-            
         }
+    });
+    socket.on('submit-track', (track) => {
+        let game = findGame(socket);
+        if (game) {
+            // Put under client id under current round
+            game.tracks[game.round][socket.id] = track;
+            console.log(game.tracks);
+            // Everyone submitted?
+            if (Object.entries(game.tracks[game.round]).length == game.clients.length) {
+                // Done with round
+                game.clients.forEach((c) => {
+                    // Build up previous round's tracks
+                    const prev = [];
 
-        if (result.method === 'roundOver') {
-            const clientId = result.clientId
-            const gameId = result.gameId;
-            const game = games.gameId;
-            const round = result.round;
+                    // TODO make this deterministic
+                    game.tracks.forEach((round) => {
+                        // Add a random track that isn't from author
+                        prev.push(Object
+                            .entries(round)
+                            .filter(([author, _]) => author != socket.id)
+                            .map(([_, track]) => track)
+                            [Math.floor(Math.random() * game.clients.length)]);
+                    });
+                    console.log(prev);
+                    // Same as (start-game), but with track data.
+                    c.emit('start-round', prev);
+                });
 
-            if (round == game.clients.length) {
-                endGame()
+                game.round += 1;
             }
-
-            const payLoad = {
-                "method": "roundOver",
-                "game": game,
-                "tracks": game.track,
-                "round": round + 1
-            }
-
-            con.send(JSON.stringify(payLoad));
-
-
-
         }
-
-
-
-
-    connection.send(JSON.stringify(payLoad)); //Sent to user. Need to parse it.
-    //send back the client connect
-
-    })
-
-// generate a new client ID
-const clientId = guid();
-clients[clientId] = { //mapping of client to a connection
-    "connection": connection
-}
-
-//payload is information sent back from server to client
-const payLoad = {
-    "method": "connect",
-    "clientId": clientId //This is the user
-
-}
-
-
+    });
+    // Find game for the given client
+    const findGame = (socket) => {
+        let out = undefined;
+        if (!players[socket.id]) {
+            socket.emit('error', 'You are not in a game!');
+        }
+        else if (!(out = games[players[socket.id]])) {
+            socket.emit('error', 'Game does not exist!');
+        }
+        return out;
+    }
 })
 
-/*function endGame() {
-
-
-
-
-} */
-
-
-//These two functions generate a unique guid
-function S4() {
-    return (((1+Math.random())*0x10000)|0).toString(16).substring(1); 
-}
- 
-let guid = () => {
-    return (S4() + S4() + "-" + S4() + "-4" + S4().substr(0, 3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
-}
-
-
+// Start server
+server.listen(PORT, () => console.log(`Listening on ${PORT}`) );
