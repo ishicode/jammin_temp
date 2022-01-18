@@ -21,7 +21,7 @@ const io = new Server(server);
 /* ---------------- */
 
 // Server all the files in `out/`
-app.use(express.static(path.resolve(__dirname, '../client/out')))
+app.use(express.static(path.resolve(__dirname, './client/out')))
 
 // Listen for incoming socket connections
 io.on('connection', (socket) => {
